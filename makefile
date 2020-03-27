@@ -1,15 +1,7 @@
-all: BootLoader
+all: BootLoaderMake
 
-BootLoader:
-	@echo
-	@echo ========== Build Boot Loader ==========
-	@echo
-
+BootLoaderMake:
 	make -C BootLoader
-
-	@echo
-	@echo ========== Build complete ==========
-	@echo
 
 clean:
 	make -C BootLoader clean
