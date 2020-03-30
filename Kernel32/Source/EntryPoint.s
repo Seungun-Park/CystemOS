@@ -9,12 +9,12 @@ START:
 	mov	es, ax
 
 	cli
-	lgdt	[GDTR]
+	lgdt	[ GDTR ]
 
 	mov	eax, 0x4000003B
 	mov	cr0, eax
 
-	jmp	dword 0x08: (PROTECTEDMODE - $$ + 0x10000)
+	jmp	dword 0x08: ( PROTECTEDMODE - $$ + 0x10000 )
 
 [BITS 32]
 PROTECTEDMODE:
@@ -28,7 +28,7 @@ PROTECTEDMODE:
 	mov	esp, 0xFFFE
 	mov	ebp, 0xFFFE
 
-	push 	(SWITCHSUCCESSMESSAGE - $$ + 0x10000)
+	push 	( SWITCHSUCCESSMESSAGE - $$ + 0x10000 )
 	push 	2
 	push	0
 	call	PRINTMESSAGE
@@ -46,25 +46,25 @@ PRINTMESSAGE:
 	push	ecx
 	push	edx
 
-	mov	eax, dword [ebp + 12]
+	mov	eax, dword [ ebp + 12 ]
 	mov	esi, 160
 	mul	esi
 	mov	edi, eax
 
-	mov	eax, dword [ebp + 8]
+	mov	eax, dword [ ebp + 8 ]
 	mov	esi, 2
 	mul	esi
-	mov	edi, eax
+	add	edi, eax
 
-	mov	eax, dword [ebp + 16]
+	mov	esi, dword [ ebp + 16 ]
 
 .MESSAGELOOP:
-	mov	cl, byte [esi]
+	mov	cl, byte [ esi ]
 
 	cmp	cl, 0
 	je	.MESSAGEEND
 
-	mov	byte [edi + 0xB8000], cl
+	mov	byte [ edi + 0xB8000 ], cl
 	add	esi, 1
 	add	edi, 2
 
@@ -84,7 +84,7 @@ align 8, db 0
 dw	0x0000
 GDTR:
 	dw	GDTEND - GDT - 1
-	dd	(GDT - $$ + 0x10000)
+	dd	( GDT - $$ + 0x10000 )
 
 GDT:
 	NULLDescriptor:
@@ -103,13 +103,13 @@ GDT:
 	;	db	0xAF
 	;	db	0x00
 
-	;CODEDESCRIPTOR:
-	;	dw	0xFFFF
-	;	dw	0x0000
-	;	db	0x00
-	;	db	0x9A
-	;	db	0xCF
-	;	db	0x00
+	CODEDESCRIPTOR:
+		dw	0xFFFF
+		dw	0x0000
+		db	0x00
+		db	0x9A
+		db	0xCF
+		db	0x00
 
 	DATADESCRIPTOR:
 		dw	0xFFFF
