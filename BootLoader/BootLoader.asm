@@ -5,8 +5,7 @@ SECTION	.text
 
 jmp 	0x07C0:START
 
-TOTALSECTORCOUNT:	dw 0x02
-KERNEL32SECTORCOUNT:	dw 0x02
+TOTALSECTORCOUNT: dw 1
 
 START:
 	mov	ax, 0x07C0
@@ -22,17 +21,14 @@ START:
 	mov	si, 0
 
 .SCREENCLEARLOOP:
-	mov	byte [ es: si], 0
-	mov	byte [ es: si + 1 ], 0x0B
+	mov	byte [es : si], 0
+	mov	byte [es : si + 1], 0x0B
 
 	add	si, 2
 
 	cmp	si, 80 * 25 * 2
 
 	jl	.SCREENCLEARLOOP
-
-	mov	si, 0
-	mov	di, 0
 
 	push	MESSAGE1
 	push	0
@@ -50,13 +46,12 @@ RESETDISK:
 	mov	ax, 0
 	mov	dl, 0
 	int	0x13
-
 	jc	HANDLEDISKERROR
 
 	mov	si, 0x1000
 	mov	es, si
 	mov	bx, 0x0000
-	mov	di, word [ TOTALSECTORCOUNT ]
+	mov	di, word [TOTALSECTORCOUNT]
 
 READDATA:
 	cmp	di, 0
@@ -65,9 +60,9 @@ READDATA:
 
 	mov	ah, 0x02
 	mov	al, 0x1
-	mov	ch, byte [ TRACKNUMBER ]
-	mov	cl, byte [ SECTORNUMBER ]
-	mov	dh, byte [ HEADNUMBER ]
+	mov	ch, byte [TRACKNUMBER]
+	mov	cl, byte [SECTORNUMBER]
+	mov	dh, byte [HEADNUMBER]
 	mov	dl, 0x00
 	int	0x13
 	jc	HANDLEDISKERROR
@@ -75,16 +70,16 @@ READDATA:
 	add	si, 0x0020
 	mov	es, si
 
-	mov	al, byte [ SECTORNUMBER ]
+	mov	al, byte [SECTORNUMBER]
 	add	al, 0x01
-	mov	byte [ SECTORNUMBER ], al
+	mov	byte [SECTORNUMBER], al
 	cmp	al, 19
 	jl	READDATA
 
-	xor	byte [ HEADNUMBER ], 0x01
-	mov	byte [ SECTORNUMBER ], 0x01
+	xor	byte [HEADNUMBER], 0x01
+	mov	byte [SECTORNUMBER], 0x01
 
-	cmp	byte [ HEADNUMBER ], 0x00
+	cmp	byte [HEADNUMBER], 0x00
 	jne	READDATA
 
 READEND:
@@ -93,15 +88,17 @@ READEND:
 	push	20
 	call	PRINTMESSAGE
 	add	sp, 6
+	
+	;run virtual OS image
 	jmp	0x1000:0x0000
 
 HANDLEDISKERROR:
 	push	DISKERRORMESSAGE
 	push	1
 	push	20
-	call PRINTMESSAGE
+	call	PRINTMESSAGE
 
-	jmp 5
+	jmp	$
 
 PRINTMESSAGE:
 	push	bp
@@ -118,25 +115,23 @@ PRINTMESSAGE:
 
 	mov	es, ax
 
-	mov	ax, word [ bp + 6 ]
+	mov	ax, word [bp + 6]
 	mov	si, 160
 	mul	si
 	mov	di, ax
 
-	mov	si, word [ bp + 4 ]
+	mov	si, word [bp + 4]
 	mov	si, 2
 	mul	si
 	add	di, ax
 
-	mov	si, word [ bp + 8 ]
-
 .MESSAGELOOP:
-	mov	cl, byte [ si ]
+	mov	cl, byte [si]
 
 	cmp	cl, 0
 	je	.MESSAGEEND
 
-	mov byte [ es: di ], cl
+	mov	byte [es : di], cl
 
 	add	si, 1
 	add	di, 2

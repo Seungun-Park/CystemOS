@@ -8,30 +8,17 @@ START:
 	mov	ds, ax
 	mov	es, ax
 
-	mov	ax, 0x2401
-	int	0x15
-
-	jc	.A20GATEERROR
-	jmp	.A20GATESUCCESS
-
-.A20GATEERROR:
-	in	al, 0x92
-	or	al, 0x02
-	and	al, 0xFE
-	out	0x92, al
-
-.A20GATESUCCESS:
 	cli
 	lgdt	[GDTR]
 
 	mov	eax, 0x4000003B
 	mov	cr0, eax
 
-	jmp	dword 0x18: (PROTECTEDMODE - $$ + 0x10000)
+	jmp	dword 0x08: (PROTECTEDMODE - $$ + 0x10000)
 
 [BITS 32]
 PROTECTEDMODE:
-	mov	ax, 0x20
+	mov	ax, 0x10
 	mov	ds, ax
 	mov	es, ax
 	mov	fs, ax
@@ -47,7 +34,7 @@ PROTECTEDMODE:
 	call	PRINTMESSAGE
 	add 	esp, 12
 
-	jmp	dword 0x18: 0x10200
+	jmp	$
 
 
 PRINTMESSAGE:
@@ -59,17 +46,17 @@ PRINTMESSAGE:
 	push	ecx
 	push	edx
 
-	mov	eax, dword [ebp+12]
+	mov	eax, dword [ebp + 12]
 	mov	esi, 160
 	mul	esi
 	mov	edi, eax
 
-	mov	eax, dword [ebp+8]
+	mov	eax, dword [ebp + 8]
 	mov	esi, 2
 	mul	esi
 	mov	edi, eax
 
-	mov	eax, dword [ebp+16]
+	mov	eax, dword [ebp + 16]
 
 .MESSAGELOOP:
 	mov	cl, byte [esi]
@@ -100,7 +87,7 @@ GDTR:
 	dd	(GDT - $$ + 0x10000)
 
 GDT:
-	MULLDescriptor:
+	NULLDescriptor:
 		dw	0x0000
 		dw	0x0000
 		db	0x00
@@ -108,21 +95,21 @@ GDT:
 		db	0x00
 		db	0x00
 
-	IA_32eCODEDESCRIPTOR:
-		dw	0xFFFF
-		dw	0x0000
-		db	0x00
-		db	0x9A
-		db	0xAF
-		db	0x00
+	;IA_32eCODEDESCRIPTOR:
+	;	dw	0xFFFF
+	;	dw	0x0000
+	;	db	0x00
+	;	db	0x9A
+	;	db	0xAF
+	;	db	0x00
 
-	CODEDESCRIPTOR:
-		dw	0xFFFF
-		dw	0x0000
-		db	0x00
-		db	0x9A
-		db	0xCF
-		db	0x00
+	;CODEDESCRIPTOR:
+	;	dw	0xFFFF
+	;	dw	0x0000
+	;	db	0x00
+	;	db	0x9A
+	;	db	0xCF
+	;	db	0x00
 
 	DATADESCRIPTOR:
 		dw	0xFFFF
